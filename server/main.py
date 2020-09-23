@@ -1,6 +1,21 @@
+import os
+
 from flask import Flask, request
+from db import init_db, init_app
 
 app = Flask(__name__)
+app.config.from_mapping(
+  SECRET_KEY='dev',
+  DATABASE=os.path.join(app.instance_path, 'server.sqlite'),
+)
+# ensure the instance folder exists
+try:
+  os.makedirs(app.instance_path)
+except OSError:
+  pass
+
+sql_db = init_db()
+init_app(app)
 
 @app.route('/')
 def hello():
