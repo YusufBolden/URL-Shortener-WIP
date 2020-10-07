@@ -1,6 +1,7 @@
 import os
 import logging
 
+from datetime import datetime
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
@@ -9,6 +10,24 @@ app.config['SQLALCHEMY_DATABSE_URI'] = 'postgresql://localhost/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 db = SQLAlchemy(app)
+
+class Url(db.Model):
+  __tablename__ = 'urls'
+
+  # Only alnum or _ in username. Between 3 and 25 chars inclusive
+  original_url=db.Column(db.String, primary_key=True)
+  shortened_path=db.Column(db.String, unique=True)
+  creation_timestamp=db.Column(db.DateTime)
+
+  def __init__(self, original, shortened):
+    # TODO: Do some validation on the passed in values.
+    self.original_url = original
+    self.shortened_path = shortened 
+    self.creation_timestamp=datetime.now()
+
+  def ToString(self):
+    return "original_url: " + self.original_url + ", shortened_path: " + self.shortened_path + ", creation_timestamp: " + self.creation_timestamp.strftime("%m/%d/%Y, %H:%M:%S")
+
 
 logger = logging.getLogger('graffiti')
 hdlr = logging.FileHandler('log.log')
@@ -54,25 +73,27 @@ def clear_db_of_everything():
   db.drop_all()
   return 'dropped\n'
 
-class Url(db.Model):
-  __tablename__ = 'urls'
-
-  # Only alnum or _ in username. Between 3 and 25 chars inclusive
-  original_url=db.Column(db.String, primary_key=True)
-  shortened_path=db.Column(db.String, unique=True)
-  creation_timestamp=db.Column(db.DateTime)
-
-  def __init__(self, original, shortened):
-    # TODO: Do some validation on the passed in values.
-    self.original_url = original
-    self.shortened_url = shortened 
+FAKE_ORIGINAL_URL='http://www.google.com'
 
 @app.route('/addfake')
 def add_fake():
   db.create_all()
-  db.session.add(Url('http://www.google.com', 'shortened'))
+  db.session.add(Url(FAKE_ORIGINAL_URL, 'shortened'))
   db.session.commit()
   return 'Added fake url\n'
+
+@app.route('/showfake')
+def show_fake():
+  db.create_all()
+  url = db.session.query(Url).filter(Url.original_url==FAKE_ORIGINAL_URL).first()
+  if url is None:
+    return "No Url with the original_url " + FAKE_ORIGINAL_URL + " was found."
+  
+  return url.ToString()
+
+@app.route('/showcolumn')
+def show_column_description():
+  return str(db.session.query(Url).column_descriptions)
 
 logger.info(init_db())
 logger.info(clear_db_of_everything())
