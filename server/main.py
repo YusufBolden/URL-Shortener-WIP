@@ -6,45 +6,40 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+
+# Move to config.py
 app.config['SQLALCHEMY_DATABSE_URI'] = 'postgresql://localhost/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
+
+# Move to db.py
 db = SQLAlchemy(app)
 
-class Url(db.Model):
-  __tablename__ = 'urls'
+# Import is down here because db must be initialized.
+from url import Url
 
-  # Only alnum or _ in username. Between 3 and 25 chars inclusive
-  original_url=db.Column(db.String, primary_key=True)
-  shortened_path=db.Column(db.String, unique=True)
-  creation_timestamp=db.Column(db.DateTime)
-
-  def __init__(self, original, shortened):
-    # TODO: Do some validation on the passed in values.
-    self.original_url = original
-    self.shortened_path = shortened 
-    self.creation_timestamp=datetime.now()
-
-  def ToString(self):
-    return "original_url: " + self.original_url + ", shortened_path: " + self.shortened_path + ", creation_timestamp: " + self.creation_timestamp.strftime("%m/%d/%Y, %H:%M:%S")
-
-
-logger = logging.getLogger('graffiti')
+logger = logging.getLogger('url_shortener')
 hdlr = logging.FileHandler('log.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
 logger.setLevel(logging.INFO)
 
+# Move APIs to separate files based no the API functionality.
 @app.route('/')
 def hello():
     print 'Hello world I am running!'
     return 'Hello World!\n'
 
 # Shortening path (i.e. hit this path when we want to shorten a new URL)
-@app.route('/s')
-def shorten():
+@app.route('/s/<original>')
+def shorten(original):
     print 'Printing from the shortened path!'
+    # Look it up in the DB.
+    # if (found in DB) { return already shortened URL }
+    # otherwise, create a shortened url (probably via some hash function)
+    # store it in the DB
+    # return the shortened URL to the user 
     return 'URL shortening not yet available!\n'
 
 # Redirection path (i.e. hit this path when we should be redirected by a shortened URL)
