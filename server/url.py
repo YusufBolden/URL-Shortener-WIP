@@ -17,3 +17,6 @@ class Url(db.Model):
 
   def ToString(self):
     return "original_url: " + self.original_url + ", shortened_path: " + self.shortened_path + ", creation_timestamp: " + self.creation_timestamp.strftime("%m/%d/%Y, %H:%M:%S")
+
+  def getShortenedPath(self):
+    return self.shortened_path

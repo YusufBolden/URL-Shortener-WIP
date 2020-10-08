@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # Move to config.py
-app.config['SQLALCHEMY_DATABSE_URI'] = 'postgresql://localhost/mydb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
@@ -28,24 +28,31 @@ logger.setLevel(logging.INFO)
 # Move APIs to separate files based no the API functionality.
 @app.route('/')
 def hello():
-    print 'Hello world I am running!'
+    print('Hello world I am running!')
     return 'Hello World!\n'
 
 # Shortening path (i.e. hit this path when we want to shorten a new URL)
 @app.route('/s/<original>')
 def shorten(original):
-    print 'Printing from the shortened path!'
+    db.create_all()
+    print('Printing from the shortened path!')
     # Look it up in the DB.
+    url = db.session.query(Url).filter(Url.original_url==original).first()
     # if (found in DB) { return already shortened URL }
+    if url is not None:
+      return url.getShortenedPath()
     # otherwise, create a shortened url (probably via some hash function)
+    short_url = hash(original)
     # store it in the DB
+    db.session.add(Url(original, str(short_url)))
+    db.session.commit()
     # return the shortened URL to the user 
-    return 'URL shortening not yet available!\n'
+    return short_url
 
 # Redirection path (i.e. hit this path when we should be redirected by a shortened URL)
 @app.route('/r/<shortened>')
 def redirect(shortened):
-    print 'Printing from the redirecting path! The parameter is %s' % shortened
+    print('Printing from the redirecting path! The parameter is %s') % shortened
     # Take shortened variable and look it up in the database
     # if (found_in_db) {
     #   redirect to the original URL
