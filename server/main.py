@@ -35,19 +35,18 @@ def hello():
 @app.route('/s/<original>')
 def shorten(original):
     db.create_all()
-    print('Printing from the shortened path!')
     # Look it up in the DB.
     url = db.session.query(Url).filter(Url.original_url==original).first()
     # if (found in DB) { return already shortened URL }
     if url is not None:
-      return url.getShortenedPath()
+        return url.getShortenedPath()
     # otherwise, create a shortened url (probably via some hash function)
     short_url = hash(original)
     # store it in the DB
     db.session.add(Url(original, str(short_url)))
     db.session.commit()
     # return the shortened URL to the user 
-    return short_url
+    return str(short_url)
 
 # Redirection path (i.e. hit this path when we should be redirected by a shortened URL)
 @app.route('/r/<shortened>')
