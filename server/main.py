@@ -51,13 +51,15 @@ def shorten(original):
 # Redirection path (i.e. hit this path when we should be redirected by a shortened URL)
 @app.route('/r/<shortened>')
 def redirect(shortened):
-    print('Printing from the redirecting path! The parameter is %s') % shortened
+    db.create_all()
+    # print('Printing from the redirecting path! The parameter is %s') % shortened
     # Take shortened variable and look it up in the database
+    short_url = db.session.query(Url).filter(Url.shortened_path==shortened).first()
     # if (found_in_db) {
-    #   redirect to the original URL
-    # else
-    #   return error message akin to url NOT_FOUND
-    return 'URL redirecting for %s not yet available!\n' % shortened
+    if short_url is not None:
+        # redirect to the original URL
+      return short_url.getOriginalPath()
+    return 'URL not found!'
 
 @app.route('/initdb')
 def init_db():

@@ -20,3 +20,6 @@ class Url(db.Model):
 
   def getShortenedPath(self):
     return self.shortened_path
+  
+  def getOriginalPath(self):
+    return self.original_url
