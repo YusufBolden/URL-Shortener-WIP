@@ -16,7 +16,7 @@ app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 db = SQLAlchemy(app)
 
 # Import is down here because db must be initialized.
-from url import Url
+from url import Url12
 
 logger = logging.getLogger('url_shortener')
 hdlr = logging.FileHandler('log.log')
