@@ -40,7 +40,7 @@ def shorten(original):
     # if (found in DB) { return already shortened URL }
     if url is not None:
         return url.getShortenedPath()
-    # otherwise, create a shortened url (probably via some hash function)
+    # otherwise, create a shortened url (probably via some type of hash function)
     short_url = hash(original)
     # store it in the DB
     db.session.add(Url(original, str(short_url)))

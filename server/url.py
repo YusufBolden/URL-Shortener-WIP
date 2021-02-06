@@ -4,7 +4,7 @@ from main import db
 class Url(db.Model):
   __tablename__ = 'urls'
 
-  # Only alnum or _ in username. Between 3 and 25 chars inclusive
+  # Only alnum or _ in username. Between 3 and 25 characters inclusive
   original_url=db.Column(db.String, primary_key=True)
   shortened_path=db.Column(db.String, unique=True)
   creation_timestamp=db.Column(db.DateTime)
